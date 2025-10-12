@@ -39,14 +39,20 @@ const SITE_CONFIGS = {
 const currentUrl = window.location.href;
 const hostname = window.location.hostname;
 let siteConfig = SITE_CONFIGS[hostname];
+let formData = {}
+let enabled = "false";
 
+let clearConfigText = false;
+
+if (clearConfigText) {
+  console.log("clearConfigText");
+}
 
 
 createInViewButton();
 setupDOMListener();
 
-let formData = {}
-let enabled = "false";
+
 
 chrome.storage.sync.get(null, function (savedData) {
   console.log('savedData:', savedData);
@@ -66,21 +72,72 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
   }
 });
 
-document.addEventListener('keydown', async function (event) {
-  if (event.key === 'Enter' || event.keyCode === 13) {
-    console.log('enter clicked! Intercepting...');
-    console.log('enter on: ', event.target);
-    if (enabled) { modifyPromptAndSubmit(); }
+async function modifyPromptContainerAsync() {
+  const promptContainer = document.querySelector(siteConfig.promptAreaSelector);
+  if (promptContainer) {
+    let originalPrompt = "";
+    originalPrompt = promptContainer.textContent.trim();
+    console.log("originalPrompt:", originalPrompt);
+    const str = JSON.stringify(formData);
+    promptContainer.textContent = originalPrompt + "\n" + " response_config_start:" + str + ":response_config_end";
   }
-}, true);
-
-function addButtonListener(button) {
-  button.setAttribute(shortcutButtonListenerattribute, 'true');
-  button.addEventListener('click', async function (event) {
-    console.log('submit button clicked! Intercepting...');
-    if (enabled) { modifyPromptAndSubmit(); }
-  }, true);
 }
+
+async function interceptEvent(e) {
+  if (e.__intercepted) return;
+
+
+  const isClick = e.type === 'click';
+  const isEnterKey = e.type === 'keydown' && e.key === 'Enter';
+
+  if (!isClick && !isEnterKey) return;
+
+  console.log('[PLUGIN] Intercepted', e.type, 'on', e.target);
+
+  e.preventDefault();
+  e.stopImmediatePropagation();
+
+  const target = e.target;
+  console.log("interceptEvent target:", target);
+  const matchesPromptArea = siteConfig.promptAreaSelector && (target.matches(siteConfig.promptAreaSelector) || target.closest(siteConfig.promptAreaSelector));
+  const matchesButton = siteConfig.buttonSelector && (target.matches(siteConfig.buttonSelector) || target.closest(siteConfig.buttonSelector));
+
+  if ((isClick && matchesButton) || (isEnterKey && matchesPromptArea)) {
+    await modifyPromptContainerAsync();
+    console.log('[PLUGIN] Async work done, re-dispatching', e.type);
+  } else {
+    console.log('[PLUGIN] No async work, re-dispatching', e.type);
+  }
+
+  const clonedEvent = new e.constructor(e.type, e);
+  Object.defineProperty(clonedEvent, '__intercepted', {
+    value: true,
+    enumerable: false,
+  });
+
+  if (isClick) {
+    target.dispatchEvent(clonedEvent);
+  } else if (isEnterKey) {
+    const enterEvent = new KeyboardEvent('keydown', {
+      key: 'Enter',
+      code: 'Enter',
+      keyCode: 13,
+      which: 13,
+      bubbles: true,
+      cancelable: true,
+    });
+
+    Object.defineProperty(enterEvent, '__intercepted', {
+      value: true,
+      enumerable: false,
+    });
+
+    target.dispatchEvent(enterEvent);
+  }
+}
+
+window.addEventListener('click', interceptEvent, true);
+window.addEventListener('keydown', interceptEvent, true);
 
 function cleanTextNodes(rootNode) {
   const IGNORE_SELECTOR = siteConfig.promptAreaSelector;
@@ -104,24 +161,17 @@ function cleanTextNodes(rootNode) {
 }
 
 function setupDOMListener() {
-  cleanTextNodes(document.body);
+  if (clearConfigText) {
+    cleanTextNodes(document.body);
+  }
+
   const observer = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
       mutation.addedNodes.forEach((node) => {
         if (node.nodeType !== 1) return;
-        cleanTextNodes(node);
-
-        if (node.matches && node.matches(siteConfig.buttonSelector)) {
-          if (!node.hasAttribute(shortcutButtonListenerattribute)) {
-            addButtonListener(node);
-          }
+        if (clearConfigText) {
+          cleanTextNodes(node);
         }
-        const childButtons = node.querySelectorAll?.(siteConfig.buttonSelector) || [];
-        childButtons.forEach(button => {
-          if (!button.hasAttribute(shortcutButtonListenerattribute)) {
-            addButtonListener(button);
-          }
-        });
       });
     });
   });
@@ -132,34 +182,10 @@ function setupDOMListener() {
     attributes: true,
     attributeFilter: ['disabled', 'class']
   });
-
-  let existingButton = document.querySelector(siteConfig.buttonSelector);
-  if (existingButton && !existingButton.hasAttribute(shortcutButtonListenerattribute)) {
-    addButtonListener(existingButton);
-  }
 }
 
 function isEmpty(str) {
   return !str || str.trim() === '';
-}
-
-function modifyPromptAndSubmit() {
-  const promptContainer = document.querySelector(siteConfig.promptAreaSelector);
-  console.log("promptContainer:", promptContainer);
-
-  if (!promptContainer) {
-    console.warn('Prompt container not found');
-    resolve();
-    return;
-  }
-
-  let originalPrompt = promptContainer.textContent.trim();
-  console.log("originalPrompt:", originalPrompt);
-
-
-  const str = JSON.stringify(formData);
-  let response_config = " response_config_start:" + str + ":response_config_end";
-  promptContainer.textContent = originalPrompt + "\n" + response_config
 }
 
 async function triggerPromptEvents(container) {
@@ -173,7 +199,6 @@ async function triggerPromptEvents(container) {
     setTimeout(resolve, 10);
   });
 }
-
 
 function createPopupIframe() {
   if (!document.getElementById(iFrameId)) {
@@ -206,7 +231,6 @@ function createPopupIframe() {
 }
 
 window.addEventListener('message', (event) => {
-  // console.log(event);
   if (event.data === 'SHOW_IFRAME') {
     createPopupIframe();
   } else if (event.data === 'CLOSE_IFRAME') {
