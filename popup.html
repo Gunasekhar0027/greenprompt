@@ -1,0 +1,66 @@
+<!-- popup.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GreenPrompt</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-top">
+                <h1 class="title">🌿 GreenPrompt</h1>
+                <div class="toggle-container">
+                    <span class="toggle-label">Enable</span>
+                    <label class="switch">
+                        <input type="checkbox" id="enable-toggle">
+                        <span class="slider round"></span>
+                    </label>
+                    <button id="closeBtn" class="btn btn-secondary">Close</button>
+                </div>
+            </div>
+            <span id="active-domain" class="domain-badge">Detecting...</span><span id="status-message"></span>
+        </div>
+
+        <div id="config-section" class="config-section">
+            <form id="configForm">
+                <div class="form-grid">
+                    <!-- Format select -->
+                    <div class="form-group">
+                        <label for="format">Format</label>
+                        <select id="format" name="format">
+                            <option value="paragraphs">Paragraphs</option>
+                            <option value="bullets">Bullets</option>
+                            <option value="table">Table</option>
+                            <option value="json">JSON</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="tone">Tone</label>
+                        <select id="tone" name="tone">
+                            <option value="simple">Simple</option>
+                            <option value="formal">Formal</option>
+                        </select>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div id="disabled-section" class="disabled-section" style="display: none;">
+            <div class="disabled-message">
+                <p>GreenPrompt is currently disabled. Enable the extension to start using sustainable prompting.</p>
+            </div>
+        </div>
+
+        <!-- <div class="footer">
+            <button id="closeBtn" class="btn btn-secondary">Close</button>
+        </div> -->
+    </div>
+    <script src="popup.js"></script>
+</body>
+
+</html>

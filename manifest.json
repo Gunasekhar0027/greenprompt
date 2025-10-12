@@ -1,0 +1,58 @@
+{
+  "manifest_version": 3,
+  "name": "Basic Popup Extension",
+  "version": "1.0",
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {}
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": [
+    "tabs",
+    "scripting",
+    "activeTab",
+    "storage"
+  ],
+  "host_permissions": [
+    "*://chatgpt.com/*",
+    "*://gemini.google.com/*",
+    "*://chat.deepseek.com/*",
+    "*://perplexity.ai/*",
+    "*://claude.ai/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "*://chatgpt.com/*",
+        "*://gemini.google.com/*",
+        "*://chat.deepseek.com/*",
+        "*://perplexity.ai/*",
+        "*://claude.ai/*"
+      ],
+      "js": [
+        "content.js",
+        "constants.js"
+      ],
+      "run_at": "document_end",
+      "all_frames": false
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "popup.html",
+        "popup.css",
+        "constants.js"
+      ],
+      "matches": [
+        "*://chatgpt.com/*",
+        "*://gemini.google.com/*",
+        "*://chat.deepseek.com/*",
+        "*://perplexity.ai/*",
+        "*://claude.ai/*"
+      ]
+    }
+  ]
+}
