@@ -14,6 +14,14 @@ const DOMAINS = {
 };
 
 const SITE_CONFIGS = {
+  [DOMAINS.CHATGPT]: {
+    promptAreaSelector: "#prompt-textarea",
+    buttonSelector: 'button[aria-label="Send prompt"]',
+  },
+  [DOMAINS.GEMINI]: {
+    promptAreaSelector: ".ql-editor",
+    buttonSelector: 'button[aria-label="Send message"]',
+  },
   [DOMAINS.CLAUDE]: {
     promptAreaSelector: 'div[contenteditable="true"][role="textbox"][aria-label="Write your prompt to Claude"]',
     buttonSelector: 'button[aria-label="Send message"]',
@@ -26,14 +34,6 @@ const SITE_CONFIGS = {
     promptAreaSelector: '#ask-input',
     buttonSelector: 'button[aria-label="Submit"]',
   },
-  [DOMAINS.CHATGPT]: {
-    promptAreaSelector: "#prompt-textarea",
-    buttonSelector: 'button[aria-label="Send prompt"]',
-  },
-  [DOMAINS.GEMINI]: {
-    promptAreaSelector: ".ql-editor",
-    buttonSelector: 'button[aria-label="Send message"]',
-  },
 };
 
 const currentUrl = window.location.href;
@@ -42,7 +42,7 @@ let siteConfig = SITE_CONFIGS[hostname];
 let formData = {}
 let enabled = "false";
 
-let clearConfigText = true;
+let clearConfigText = false;
 
 if (clearConfigText) {
   console.log("clearConfigText");
