@@ -42,7 +42,7 @@ let siteConfig = SITE_CONFIGS[hostname];
 let formData = {}
 let enabled = "false";
 
-let clearConfigText = false;
+let clearConfigText = true;
 
 if (clearConfigText) {
   console.log("clearConfigText");
@@ -79,13 +79,13 @@ async function modifyPromptContainerAsync() {
     originalPrompt = promptContainer.textContent.trim();
     console.log("originalPrompt:", originalPrompt);
     const str = JSON.stringify(formData);
+    originalPrompt = originalPrompt.replace(/response_config_start:[\s\S]*?:response_config_end/g, '');
     promptContainer.textContent = originalPrompt + "\n" + " response_config_start:" + str + ":response_config_end";
   }
 }
 
 async function interceptEvent(e) {
   if (e.__intercepted) return;
-
 
   const isClick = e.type === 'click';
   const isEnterKey = e.type === 'keydown' && e.key === 'Enter';
