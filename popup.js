@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const enabledData = savedData["greenPromptEnabled"];
       toggleUI(enabledData);
       const formData = savedData["form"];
+      console.log('popup.js formData: ', formData);
       for (const [key, value] of Object.entries(formData)) {
         const field = elements.configForm.elements[key];
         if (field) {

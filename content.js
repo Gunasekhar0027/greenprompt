@@ -60,7 +60,7 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
     formData = changes.form.newValue;
     console.log('Updated formData loaded:', formData);
   }
-  if(areaName === 'sync' && changes.greenPromptEnabled){
+  if (areaName === 'sync' && changes.greenPromptEnabled) {
     enabled = changes.greenPromptEnabled.newValue;
     console.log('Updated greenPromptEnabled loaded:', enabled);
   }
@@ -68,19 +68,9 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
 
 document.addEventListener('keydown', async function (event) {
   if (event.key === 'Enter' || event.keyCode === 13) {
-    //event.preventDefault();
+    console.log('enter clicked! Intercepting...');
     console.log('enter on: ', event.target);
-    try {
-      await modifyPromptAndSubmit();
-      const promptContainer = document.querySelector(siteConfig.promptAreaSelector);
-      const existingButton = document.getElementById(siteConfig.buttonSelector);
-      if (existingButton) {
-        existingButton.click();
-      }
-      promptContainer.textContent = null;
-    } catch (error) {
-      console.error('Error in Enter key handler:', error);
-    }
+    if (enabled) { modifyPromptAndSubmit(); }
   }
 }, true);
 
@@ -88,10 +78,7 @@ function addButtonListener(button) {
   button.setAttribute(shortcutButtonListenerattribute, 'true');
   button.addEventListener('click', async function (event) {
     console.log('submit button clicked! Intercepting...');
-    event.preventDefault();
-
-    await modifyPromptAndSubmit();
-
+    if (enabled) { modifyPromptAndSubmit(); }
   }, true);
 }
 
@@ -156,29 +143,23 @@ function isEmpty(str) {
   return !str || str.trim() === '';
 }
 
-async function modifyPromptAndSubmit() {
-  return new Promise((resolve, reject) => {
-    try {
-      const promptContainer = document.querySelector(siteConfig.promptAreaSelector);
-      console.log("promptContainer:", promptContainer);
+function modifyPromptAndSubmit() {
+  const promptContainer = document.querySelector(siteConfig.promptAreaSelector);
+  console.log("promptContainer:", promptContainer);
 
-      if (!promptContainer) {
-        console.warn('Prompt container not found');
-        resolve();
-        return;
-      }
+  if (!promptContainer) {
+    console.warn('Prompt container not found');
+    resolve();
+    return;
+  }
 
-      let originalPrompt = promptContainer.textContent.trim();
-      console.log("originalPrompt:", originalPrompt);
+  let originalPrompt = promptContainer.textContent.trim();
+  console.log("originalPrompt:", originalPrompt);
 
 
-      const str = JSON.stringify(formData);
-      let response_config = " response_config_start:" + str + ":response_config_end";
-      promptContainer.textContent = originalPrompt + "\n" + response_config
-    } catch (error) {
-      reject(error);
-    }
-  });
+  const str = JSON.stringify(formData);
+  let response_config = " response_config_start:" + str + ":response_config_end";
+  promptContainer.textContent = originalPrompt + "\n" + response_config
 }
 
 async function triggerPromptEvents(container) {
