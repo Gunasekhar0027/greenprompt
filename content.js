@@ -40,8 +40,9 @@ const currentUrl = window.location.href;
 const hostname = window.location.hostname;
 let siteConfig = SITE_CONFIGS[hostname];
 let formData = {}
-let enabled = "false";
 
+
+let enabled = "false";
 let clearConfigText = false;
 
 if (clearConfigText) {
@@ -85,7 +86,7 @@ async function modifyPromptContainerAsync() {
 }
 
 async function interceptEvent(e) {
-  if (e.__intercepted) return;
+  if (e.__intercepted || enabled === "false") return;
 
   const isClick = e.type === 'click';
   const isEnterKey = e.type === 'keydown' && e.key === 'Enter';

@@ -62,13 +62,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function toggleUI(isEnabled) {
     if (isEnabled === "true") {
+      elements.statusMessage.style.color = "green";
+      elements.statusMessage.textContent = '    GreenPrompt is enabled!';
       elements.enableToggle.checked = true;
-      elements.configSection.style.display = 'flex';
-      elements.disabledSection.style.display = 'none';
+      //elements.configSection.style.display = 'flex';
+      //elements.disabledSection.style.display = 'none';
     } else {
+      elements.statusMessage.style.color = "red";
+      elements.statusMessage.textContent = '    GreenPrompt is disabled!';
       elements.enableToggle.checked = false;
-      elements.configSection.style.display = 'none';
-      elements.disabledSection.style.display = 'flex';
+      //elements.configSection.style.display = 'none';
+      //elements.disabledSection.style.display = 'flex';
     }
   }
 
@@ -90,18 +94,10 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  function showStatus(message) {
-    elements.statusMessage.textContent = message;
-    setTimeout(() => {
-      elements.statusMessage.textContent = '';
-    }, 2000);
-  }
-
   elements.enableToggle.addEventListener('change', (e) => {
     const isEnabled = e.target.checked ? "true" : "false";
     chrome.storage.sync.set({ greenPromptEnabled: isEnabled }, function () {
       toggleUI(isEnabled);
-      showStatus(e.target.checked ? '    Extension enabled!' : '    Extension disabled!');
     });
   });
 });
