@@ -8,18 +8,18 @@ const DOMAINS = {
   NONE: "",
   CHATGPT: 'chatgpt.com',
   GEMINI: 'gemini.google.com',
-  PERPLEXITY: 'perplexity.ai',
+  PERPLEXITY: 'www.perplexity.ai',
   DEEPSEEK: 'chat.deepseek.com',
   CLAUDE: 'claude.ai'
 };
 
 const SITE_CONFIGS = {
   [DOMAINS.CHATGPT]: {
-    promptAreaSelector: "#prompt-textarea",
+    promptAreaSelector: "div#prompt-textarea",
     buttonSelector: 'button[aria-label="Send prompt"]',
   },
   [DOMAINS.GEMINI]: {
-    promptAreaSelector: ".ql-editor",
+    promptAreaSelector: 'div.ql-editor[aria-label="Enter a prompt here"]',
     buttonSelector: 'button[aria-label="Send message"]',
   },
   [DOMAINS.CLAUDE]: {
@@ -28,10 +28,10 @@ const SITE_CONFIGS = {
   },
   [DOMAINS.DEEPSEEK]: {
     promptAreaSelector: 'textarea[placeholder="Message DeepSeek"]',
-    buttonSelector: '.ds-icon-button._7436101',
+    buttonSelector: 'div.ds-icon-button[aria-disabled="false"]',
   },
   [DOMAINS.PERPLEXITY]: {
-    promptAreaSelector: '#ask-input',
+    promptAreaSelector: 'div#ask-input',
     buttonSelector: 'button[aria-label="Submit"]',
   },
 };
@@ -43,7 +43,7 @@ let formData = {}
 
 
 let enabled = "false";
-let clearConfigText = false;
+let clearConfigText = true;
 
 if (clearConfigText) {
   console.log("clearConfigText");
@@ -73,41 +73,101 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
   }
 });
 
-async function modifyPromptContainerAsync() {
-  const promptContainer = document.querySelector(siteConfig.promptAreaSelector);
-  if (promptContainer) {
-    let originalPrompt = "";
-    originalPrompt = promptContainer.textContent.trim();
-    console.log("originalPrompt:", originalPrompt);
-    const str = JSON.stringify(formData);
-    originalPrompt = originalPrompt.replace(/response_config_start:[\s\S]*?:response_config_end/g, '');
-    promptContainer.textContent = originalPrompt + "\n" + " response_config_start:" + str + ":response_config_end";
+function hasValidValue(value) {
+  // Check for null, undefined, or NaN
+  if (value === null || value === undefined || Number.isNaN(value)) {
+    return false;
   }
+
+  // If it's a string: trim and check length
+  if (typeof value === "string") {
+    return value.trim().length > 0;
+  }
+
+  // If it's an object or array: ensure it’s not empty
+  if (typeof value === "object") {
+    return Object.keys(value).length > 0;
+  }
+
+  // For numbers, booleans, etc. — all valid (since not null/undefined/NaN)
+  return true;
 }
 
 async function interceptEvent(e) {
   if (e.__intercepted || enabled === "false") return;
 
   const isClick = e.type === 'click';
-  const isEnterKey = e.type === 'keydown' && e.key === 'Enter';
+  const isEnterKey = (
+    e.type === 'keydown' &&
+    e.key === 'Enter' &&
+    !e.shiftKey &&
+    !e.ctrlKey &&
+    !e.altKey &&
+    !e.metaKey
+  );
 
   if (!isClick && !isEnterKey) return;
-
-  console.log('[PLUGIN] Intercepted', e.type, 'on', e.target);
 
   e.preventDefault();
   e.stopImmediatePropagation();
 
   const target = e.target;
-  console.log("interceptEvent target:", target);
   const matchesPromptArea = siteConfig.promptAreaSelector && (target.matches(siteConfig.promptAreaSelector) || target.closest(siteConfig.promptAreaSelector));
   const matchesButton = siteConfig.buttonSelector && (target.matches(siteConfig.buttonSelector) || target.closest(siteConfig.buttonSelector));
 
   if ((isClick && matchesButton) || (isEnterKey && matchesPromptArea)) {
-    await modifyPromptContainerAsync();
-    console.log('[PLUGIN] Async work done, re-dispatching', e.type);
-  } else {
-    console.log('[PLUGIN] No async work, re-dispatching', e.type);
+    console.log("[GREENPROMPT] interceptEvent target:", target);
+    await (async () => {
+      try {
+        const promptContainer = document.querySelector(siteConfig.promptAreaSelector);
+        if (promptContainer) {
+          let originalPrompt = "";
+          if (siteConfig.promptAreaSelector.includes("div")) {
+            originalPrompt = promptContainer.textContent.trim();
+          } else {
+            originalPrompt = promptContainer.value.trim();
+          }
+
+          console.log("originalPrompt:", originalPrompt);
+          if (hasValidValue(originalPrompt)) {
+            const str = JSON.stringify(formData);
+            let newPrompt = originalPrompt.replace(/response_config_start:[\s\S]*?:response_config_end/g, '');
+            newPrompt = newPrompt + "\n" + " response_config_start:" + str + ":response_config_end";
+            if (siteConfig.promptAreaSelector.includes("div")) {
+              promptContainer.textContent = newPrompt;
+              if (siteConfig === DOMAINS.PERPLEXITY) {
+
+                const active = document.activeElement;
+                if (!active) return;
+                active.focus();
+                document.execCommand("insertText", false, text);
+                //   const div = document.getElementById('ask-input');
+                //   div.focus();
+
+                //   const pasteEvent = new ClipboardEvent('paste', {
+                //     bubbles: true,
+                //     cancelable: true,
+                //     clipboardData: new DataTransfer()
+                //   });
+
+                //   // Put your text into the clipboard data
+                //   pasteEvent.clipboardData.setData('text/plain', 'Hello, world!');
+
+                //   // Dispatch the event
+                //   promptContainer.dispatchEvent(pasteEvent);
+              }
+            } else {
+              promptContainer.value = newPrompt;
+              promptContainer.dispatchEvent(new Event('input', { bubbles: true }));
+              promptContainer.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    })();
+    console.log('[GREENPROMPT] Async work done, re-dispatching', e.type);
   }
 
   const clonedEvent = new e.constructor(e.type, e);
@@ -117,7 +177,7 @@ async function interceptEvent(e) {
   });
 
   if (isClick) {
-    target.dispatchEvent(clonedEvent);
+    //target.dispatchEvent(clonedEvent);
   } else if (isEnterKey) {
     const enterEvent = new KeyboardEvent('keydown', {
       key: 'Enter',
@@ -132,8 +192,7 @@ async function interceptEvent(e) {
       value: true,
       enumerable: false,
     });
-
-    target.dispatchEvent(enterEvent);
+    //target.dispatchEvent(enterEvent);
   }
 }
 
@@ -163,7 +222,7 @@ function cleanTextNodes(rootNode) {
 
 function setupDOMListener() {
   if (clearConfigText) {
-    cleanTextNodes(document.body);
+    //cleanTextNodes(document.body);
   }
 
   const observer = new MutationObserver((mutations) => {
@@ -171,7 +230,7 @@ function setupDOMListener() {
       mutation.addedNodes.forEach((node) => {
         if (node.nodeType !== 1) return;
         if (clearConfigText) {
-          cleanTextNodes(node);
+          //cleanTextNodes(node);
         }
       });
     });

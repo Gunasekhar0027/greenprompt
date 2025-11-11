@@ -19,7 +19,7 @@
     "*://chatgpt.com/*",
     "*://gemini.google.com/*",
     "*://chat.deepseek.com/*",
-    "*://perplexity.ai/*",
+    "*://www.perplexity.ai/*",
     "*://claude.ai/*"
   ],
   "content_scripts": [
@@ -28,7 +28,7 @@
         "*://chatgpt.com/*",
         "*://gemini.google.com/*",
         "*://chat.deepseek.com/*",
-        "*://perplexity.ai/*",
+        "*://www.perplexity.ai/*",
         "*://claude.ai/*"
       ],
       "js": [
@@ -50,7 +50,7 @@
         "*://chatgpt.com/*",
         "*://gemini.google.com/*",
         "*://chat.deepseek.com/*",
-        "*://perplexity.ai/*",
+        "*://www.perplexity.ai/*",
         "*://claude.ai/*"
       ]
     }
