@@ -1,6 +1,5 @@
 //content.js
 
-let shortcutButtonListenerattribute = "data-greenprompt-listener";
 let iFrameId = "green_prompt_popup-iframe";
 let shortcutButtonId = "greenprompt-integrated-btn";
 
@@ -43,7 +42,7 @@ let formData = {}
 
 
 let enabled = "false";
-let clearConfigText = true;
+let clearConfigText = false;
 
 if (clearConfigText) {
   console.log("clearConfigText");
@@ -95,8 +94,16 @@ function hasValidValue(value) {
 
 async function interceptEvent(e) {
   if (e.__intercepted || enabled === "false") return;
+  if (e.target.closest(`#${shortcutButtonId}`)) {
+    return;
+  }
 
-  const isClick = e.type === 'click';
+  const isClick = (e.type === 'click' &&
+    !e.shiftKey &&
+    !e.ctrlKey &&
+    !e.altKey &&
+    !e.metaKey);
+
   const isEnterKey = (
     e.type === 'keydown' &&
     e.key === 'Enter' &&
@@ -135,27 +142,6 @@ async function interceptEvent(e) {
             newPrompt = newPrompt + "\n" + " response_config_start:" + str + ":response_config_end";
             if (siteConfig.promptAreaSelector.includes("div")) {
               promptContainer.textContent = newPrompt;
-              if (siteConfig === DOMAINS.PERPLEXITY) {
-
-                const active = document.activeElement;
-                if (!active) return;
-                active.focus();
-                document.execCommand("insertText", false, text);
-                //   const div = document.getElementById('ask-input');
-                //   div.focus();
-
-                //   const pasteEvent = new ClipboardEvent('paste', {
-                //     bubbles: true,
-                //     cancelable: true,
-                //     clipboardData: new DataTransfer()
-                //   });
-
-                //   // Put your text into the clipboard data
-                //   pasteEvent.clipboardData.setData('text/plain', 'Hello, world!');
-
-                //   // Dispatch the event
-                //   promptContainer.dispatchEvent(pasteEvent);
-              }
             } else {
               promptContainer.value = newPrompt;
               promptContainer.dispatchEvent(new Event('input', { bubbles: true }));
@@ -177,7 +163,7 @@ async function interceptEvent(e) {
   });
 
   if (isClick) {
-    //target.dispatchEvent(clonedEvent);
+    target.dispatchEvent(clonedEvent);
   } else if (isEnterKey) {
     const enterEvent = new KeyboardEvent('keydown', {
       key: 'Enter',
@@ -192,7 +178,7 @@ async function interceptEvent(e) {
       value: true,
       enumerable: false,
     });
-    //target.dispatchEvent(enterEvent);
+    target.dispatchEvent(enterEvent);
   }
 }
 
@@ -222,7 +208,7 @@ function cleanTextNodes(rootNode) {
 
 function setupDOMListener() {
   if (clearConfigText) {
-    //cleanTextNodes(document.body);
+    cleanTextNodes(document.body);
   }
 
   const observer = new MutationObserver((mutations) => {
@@ -230,7 +216,7 @@ function setupDOMListener() {
       mutation.addedNodes.forEach((node) => {
         if (node.nodeType !== 1) return;
         if (clearConfigText) {
-          //cleanTextNodes(node);
+          cleanTextNodes(node);
         }
       });
     });

@@ -65,14 +65,10 @@ document.addEventListener('DOMContentLoaded', function () {
       elements.statusMessage.style.color = "green";
       elements.statusMessage.textContent = '    GreenPrompt is enabled!';
       elements.enableToggle.checked = true;
-      //elements.configSection.style.display = 'flex';
-      //elements.disabledSection.style.display = 'none';
     } else {
       elements.statusMessage.style.color = "red";
       elements.statusMessage.textContent = '    GreenPrompt is disabled!';
       elements.enableToggle.checked = false;
-      //elements.configSection.style.display = 'none';
-      //elements.disabledSection.style.display = 'flex';
     }
   }
 
