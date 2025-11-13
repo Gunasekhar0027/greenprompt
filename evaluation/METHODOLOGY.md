@@ -15,5 +15,5 @@
 - **CO₂:** estimate = tokens × conversion factor
 
 **Decision Rule (SPROUT style):**
-GreenPrompt should *reduce tokens* without lowering accuracy by more than **2%**.  
+GreenPrompt should reduce tokens without lowering accuracy by more than **2%**.  
 If accuracy is similar (non-inferior) but efficiency improves, that’s a success.
