@@ -90,9 +90,11 @@ This section responds to feedback about examining accuracy when modifying prompt
 
 ---
 
-### evaluation/qa_small.json
-A simple set of sample questions used to test whether GreenPrompt changes answer quality.  
-This small dataset makes it easy to run quick comparisons.
+## Evaluation Prompts
+
+All evaluation prompts used to test the effect of GreenPrompt on output format, tone, detail, and language are available here:
+
+[test_prompts.md](greenprompt/evaluation/test_prompts.md)
 
 ---
 
