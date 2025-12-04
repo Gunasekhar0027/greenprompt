@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const enabledData = savedData["greenPromptEnabled"];
       toggleUI(enabledData);
       const formData = savedData["form"];
-      console.log('popup.js formData: ', formData);
+      //console.log('popup.js formData: ', formData);
       for (const [key, value] of Object.entries(formData)) {
         const field = elements.configForm.elements[key];
         if (field) {
@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', function () {
           }
         }
       }
-      console.log('Form loaded with saved data:', savedData);
+      //console.log('Form loaded with saved data:', savedData);
     } catch (err) {
       console.error('Error assigning saved data to form:', err);
     }
@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     chrome.storage.sync.set({ form: changedFields }, function () {
-      console.log('Format saved to Chrome storage:', { form: changedFields });
+      //console.log('Format saved to Chrome storage:', { form: changedFields });
     });
   });
 
@@ -63,11 +63,11 @@ document.addEventListener('DOMContentLoaded', function () {
   function toggleUI(isEnabled) {
     if (isEnabled === "true") {
       elements.statusMessage.style.color = "green";
-      elements.statusMessage.textContent = '    GreenPrompt is enabled!';
+      elements.statusMessage.textContent = '    PromptLite is enabled!';
       elements.enableToggle.checked = true;
     } else {
       elements.statusMessage.style.color = "red";
-      elements.statusMessage.textContent = '    GreenPrompt is disabled!';
+      elements.statusMessage.textContent = '    PromptLite is disabled!';
       elements.enableToggle.checked = false;
     }
   }
@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', function () {
       if (tabs[0] && tabs[0].url) {
         try {
           const url = new URL(tabs[0].url);
-          const knownDomains = ['chatgpt.com', 'gemini.google.com', 'chat.deepseek.com', 'claude.ai', 'perplexity.ai'];
+          const knownDomains = ['chatgpt.com', 'gemini.google.com', 'chat.deepseek.com', 'claude.ai'];
           if (knownDomains.includes(url.hostname)) {
             elements.activeDomain.textContent = `LLM: ${url.hostname}`;
           } else {

@@ -1,17 +1,17 @@
 {
   "manifest_version": 3,
-  "name": "GreenPrompt",
-  "version": "1.0",
+  "name": "PromptLite",
+  "version": "3.0",
   "action": {
     "default_popup": "popup.html",
-    "default_icon": {}
-  },
-  "background": {
-    "service_worker": "background.js"
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    }
   },
   "permissions": [
     "tabs",
-    "scripting",
     "activeTab",
     "storage"
   ],
@@ -19,7 +19,6 @@
     "*://chatgpt.com/*",
     "*://gemini.google.com/*",
     "*://chat.deepseek.com/*",
-    "*://www.perplexity.ai/*",
     "*://claude.ai/*"
   ],
   "content_scripts": [
@@ -28,12 +27,10 @@
         "*://chatgpt.com/*",
         "*://gemini.google.com/*",
         "*://chat.deepseek.com/*",
-        "*://www.perplexity.ai/*",
         "*://claude.ai/*"
       ],
       "js": [
-        "content.js",
-        "constants.js"
+        "content.js"
       ],
       "run_at": "document_end",
       "all_frames": false
@@ -44,15 +41,21 @@
       "resources": [
         "popup.html",
         "popup.css",
-        "constants.js"
+        "icons/icon-16.png",
+        "icons/icon-48.png",
+        "icons/icon-128.png"
       ],
       "matches": [
         "*://chatgpt.com/*",
         "*://gemini.google.com/*",
         "*://chat.deepseek.com/*",
-        "*://www.perplexity.ai/*",
         "*://claude.ai/*"
       ]
     }
-  ]
+  ],
+  "icons": {
+    "16": "icons/icon-16.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  }
 }

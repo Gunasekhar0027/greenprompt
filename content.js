@@ -1,7 +1,7 @@
 //content.js
 
-let iFrameId = "green_prompt_popup-iframe";
-let shortcutButtonId = "greenprompt-integrated-btn";
+let iFrameId = "promptlite_popup-iframe";
+let shortcutButtonId = "promptlite-integrated-btn";
 
 const DOMAINS = {
   NONE: "",
@@ -29,11 +29,11 @@ const SITE_CONFIGS = {
     promptAreaSelector: 'textarea[placeholder="Message DeepSeek"]',
     buttonSelector: 'div.ds-icon-button[aria-disabled="false"]',
   },
-  [DOMAINS.PERPLEXITY]: {
-    promptAreaSelector: 'div#ask-input',
-    buttonSelector: 'button[aria-label="Submit"]',
-  },
 };
+
+const regex = /response_directives:[\s\S]*?:end/g;
+const regexPrefix = "response_directives:";
+const regexSuffix = ":end";
 
 const currentUrl = window.location.href;
 const hostname = window.location.hostname;
@@ -42,11 +42,11 @@ let formData = {}
 
 
 let enabled = "false";
-let clearConfigText = false;
+let clearConfigText = true;
 
-if (clearConfigText) {
-  console.log("clearConfigText");
-}
+// if (clearConfigText) {
+//   console.log("clearConfigText");
+// }
 
 
 createInViewButton();
@@ -55,40 +55,33 @@ setupDOMListener();
 
 
 chrome.storage.sync.get(null, function (savedData) {
-  console.log('savedData:', savedData);
+  //console.log('savedData:', savedData);
   formData = savedData["form"];
-  console.log('Initial formData loaded:', formData);
+  //console.log('Initial formData loaded:', formData);
   enabled = savedData["greenPromptEnabled"];
 });
 
 chrome.storage.onChanged.addListener((changes, areaName) => {
   if (areaName === 'sync' && changes.form) {
     formData = changes.form.newValue;
-    console.log('Updated formData loaded:', formData);
+    //console.log('Updated formData loaded:', formData);
   }
   if (areaName === 'sync' && changes.greenPromptEnabled) {
     enabled = changes.greenPromptEnabled.newValue;
-    console.log('Updated greenPromptEnabled loaded:', enabled);
+    //console.log('Updated greenPromptEnabled loaded:', enabled);
   }
 });
 
 function hasValidValue(value) {
-  // Check for null, undefined, or NaN
   if (value === null || value === undefined || Number.isNaN(value)) {
     return false;
   }
-
-  // If it's a string: trim and check length
   if (typeof value === "string") {
     return value.trim().length > 0;
   }
-
-  // If it's an object or array: ensure it’s not empty
   if (typeof value === "object") {
     return Object.keys(value).length > 0;
   }
-
-  // For numbers, booleans, etc. — all valid (since not null/undefined/NaN)
   return true;
 }
 
@@ -123,7 +116,7 @@ async function interceptEvent(e) {
   const matchesButton = siteConfig.buttonSelector && (target.matches(siteConfig.buttonSelector) || target.closest(siteConfig.buttonSelector));
 
   if ((isClick && matchesButton) || (isEnterKey && matchesPromptArea)) {
-    console.log("[GREENPROMPT] interceptEvent target:", target);
+    //console.log("interceptEvent target:", target);
     await (async () => {
       try {
         const promptContainer = document.querySelector(siteConfig.promptAreaSelector);
@@ -135,11 +128,11 @@ async function interceptEvent(e) {
             originalPrompt = promptContainer.value.trim();
           }
 
-          console.log("originalPrompt:", originalPrompt);
+          //console.log("originalPrompt:", originalPrompt);
           if (hasValidValue(originalPrompt)) {
             const str = JSON.stringify(formData);
-            let newPrompt = originalPrompt.replace(/response_config_start:[\s\S]*?:response_config_end/g, '');
-            newPrompt = newPrompt + "\n" + " response_config_start:" + str + ":response_config_end";
+            let newPrompt = originalPrompt.replace(regex, '');
+            newPrompt = newPrompt + "\n" + regexPrefix + str + regexSuffix;
             if (siteConfig.promptAreaSelector.includes("div")) {
               promptContainer.textContent = newPrompt;
             } else {
@@ -153,7 +146,6 @@ async function interceptEvent(e) {
         console.error("Error:", error);
       }
     })();
-    console.log('[GREENPROMPT] Async work done, re-dispatching', e.type);
   }
 
   const clonedEvent = new e.constructor(e.type, e);
@@ -198,7 +190,7 @@ function cleanTextNodes(rootNode) {
     }
 
     const originalText = node.nodeValue;
-    const cleanedText = originalText.replace(/response_config_start:[\s\S]*?:response_config_end/g, '');
+    const cleanedText = originalText.replace(regex, '');
 
     if (originalText !== cleanedText) {
       node.nodeValue = cleanedText;
@@ -250,8 +242,8 @@ function createPopupIframe() {
   if (!document.getElementById(iFrameId)) {
     const iframe = document.createElement('iframe');
     iframe.id = iFrameId;
-    const ext = typeof browser !== 'undefined' ? browser : chrome;
-    iframe.src = ext.runtime.getURL('popup.html');
+    //const ext = typeof browser !== 'undefined' ? browser : chrome;
+    iframe.src = chrome.runtime.getURL('popup.html');
 
     const iframeStyles = {
       position: 'fixed',
@@ -292,9 +284,12 @@ function createInViewButton() {
   if (!document.getElementById(shortcutButtonId)) {
     const integratedBtn = document.createElement('button');
     integratedBtn.id = shortcutButtonId;
-    integratedBtn.innerHTML = '🌿';
-    integratedBtn.title = 'GreenPrompt Settings';
-    integratedBtn.setAttribute('aria-label', 'Open GreenPrompt Settings');
+    integratedBtn.innerHTML = `<img src="${chrome.runtime.getURL('icons/icon-48.png')}" 
+                            alt="PromptLite" 
+                            style="width: 45px; height: 45px; object-fit: contain; pointer-events: none;">`;
+    integratedBtn.title = 'PromptLite';
+    integratedBtn.setAttribute('aria-label', 'PromptLite');
+
 
     const LONG_PRESS_DURATION = 300;
     const DRAG_THRESHOLD = 5;

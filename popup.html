@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GreenPrompt</title>
+    <title>PromptLite</title>
 </head>
 
 <style>
@@ -231,7 +231,11 @@
     <div class="container">
         <div class="header">
             <div class="header-top">
-                <h1 class="title">🌿 GreenPrompt</h1>
+                <h1 class="title">
+                    <img src="icons/icon-48.png" alt="PromptLite"
+                        style="width: 24px; height: 24px; margin-right: 8px; vertical-align: middle;">
+                    PromptLite
+                </h1>
                 <div class="toggle-container">
                     <!-- <span class="toggle-label">Enable</span> -->
                     <label class="switch">
@@ -270,20 +274,20 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="size">Size</label>
+                        <label for="size">Max Size</label>
                         <select id="size" name="size">
-                            <option value="upto_10_lines">Upto 10 Lines</option>
-                            <option value="upto_20_lines">Upto 20 Lines</option>
-                            <option value="upto_30_lines">Upto 30 Lines</option>
-                            <option value="upto_40_lines">Upto 40 Lines</option>
-                            <option value="upto_50_lines">Upto 50 Lines</option>
-                            <option value="upto_60_lines">Upto 60 Lines</option>
-                            <option value="upto_70_lines">Upto 70 Lines</option>
-                            <option value="upto_80_lines">Upto 80 Lines</option>
-                            <option value="upto_90_lines">Upto 90 Lines</option>
-                            <option value="upto_100_lines">Upto 100 Lines</option>
-                            <option value="upto_110_lines">Upto 110 Lines</option>
-                            <option value="upto_120_lines">Upto 120 Lines</option>
+                            <option value="upto_10_lines">10 Lines</option>
+                            <option value="upto_20_lines">20 Lines</option>
+                            <option value="upto_30_lines">30 Lines</option>
+                            <option value="upto_40_lines">40 Lines</option>
+                            <option value="upto_50_lines">50 Lines</option>
+                            <option value="upto_60_lines">60 Lines</option>
+                            <option value="upto_70_lines">70 Lines</option>
+                            <option value="upto_80_lines">80 Lines</option>
+                            <option value="upto_90_lines">90 Lines</option>
+                            <option value="upto_100_lines">100 Lines</option>
+                            <option value="upto_110_lines">110 Lines</option>
+                            <option value="upto_120_lines">120 Lines</option>
                         </select>
                     </div>
 
@@ -291,7 +295,7 @@
                         <label for="mode">Mode</label>
                         <select id="mode" name="mode">
                             <option value="general">General Mode</option>
-                            <option value="qa">Question-Answer Mode</option>
+                            <option value="question_answer">Question-Answer Mode</option>
                             <option value="study">Study / Learning Mode</option>
                             <option value="coding">Coding / Development Mode</option>
                             <option value="creative">Creative Writing Mode</option>
@@ -344,20 +348,18 @@
                         <div>
                             <label for="sustainableMode">Enable Sustainable Response Optimization</label>
                             <label class="switch">
-                                <input type="checkbox" id="sustainableMode" name="sustainableMode" checked>
+                                <input type="checkbox" id="sustainableMode" name="sustainableMode">
                                 <span class="slider"></span>
                             </label>
                         </div>
                     </div>
                 </div>
-
-
             </form>
         </div>
 
         <div id="disabled-section" class="disabled-section" style="display: none;">
             <div class="disabled-message">
-                <p>GreenPrompt is currently disabled. Enable the extension to start using sustainable prompting.</p>
+                <p>PromptLite is currently disabled. Enable the extension to start using sustainable prompting.</p>
             </div>
         </div>
     </div>
